@@ -13,7 +13,6 @@
 from __future__ import annotations
 
 import re
-from typing import Any
 
 from app.configs.settings import settings
 
@@ -31,7 +30,7 @@ def check_evidence(text: str, allow_run_ids: set[int] | None = None) -> list[dic
     """P2：证据/引用检查——结论必须挂引用，无引用标存疑。"""
     notes = []
     # 提取疑似结论行（冒号后内容）
-    lines = [l.strip() for l in (text or "").splitlines() if l.strip()]
+    lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
     if not any(keyword in line for line in lines for keyword in ("结论", "根因", "怀疑", "原因")):
         return notes
     has_ref = bool(re.search(r"@[a-zA-Z0-9_\-]+|run[_ ]?id|第\d+次", (text or "")))

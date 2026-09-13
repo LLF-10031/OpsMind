@@ -8,7 +8,7 @@ usage 校准由调用方读取 usage.prompt_tokens 回写。
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Awaitable
+from typing import Any, Callable
 
 from app.configs.settings import get_settings
 from app.core.llm import get_light_llm

@@ -11,7 +11,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
-from app.core.logging import logger
 from app.services.context import assemble_context
 from app.services.validation import run_pipeline
 

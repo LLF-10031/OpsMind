@@ -131,6 +131,7 @@ def auto_setup_keygen() -> None:
     注入 async 函数（`_light_keygen_async`），供 `agenerate_keys` await 调用；
     `light_keygen`(sync) 仅在无 async 环境下作最后兜底，不注入。
     """
+    global KEYGEN_FN
     try:
         from app.configs.settings import settings
 

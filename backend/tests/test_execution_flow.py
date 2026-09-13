@@ -8,7 +8,6 @@ from pathlib import Path
 import pytest_asyncio
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import (
-    AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
@@ -99,7 +98,6 @@ import pytest  # noqa: E402
 async def test_execute_task_run_flow(exec_env):
     tr_id = exec_env["tr_id"]
     factory = exec_env["factory"]
-    engine = exec_env["engine"]
 
     result = await execution.execute_task_run(tr_id)
     assert result["ok"] is True

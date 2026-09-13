@@ -4,7 +4,6 @@ embedding 失败自动降级（BM25-only，D41 声明级），不阻塞入库。
 """
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession

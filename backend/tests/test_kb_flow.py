@@ -1,14 +1,11 @@
 """知识库端到端（D40/D41/D48）：ingest → unit/key_index → hybrid_search（BM25 降级）。"""
-from datetime import datetime, timezone
-from pathlib import Path
 
 import pytest_asyncio
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.db import Base
-from app.models import Document, KeyIndex, Unit
-from app.services import embedding
+from app.models import KeyIndex
 
 
 async def fallback_embed(texts):
@@ -28,7 +25,6 @@ async def kb_env(tmp_path, monkeypatch):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    import asyncio
 
     # 注入 embed（fallback 版本）避免触发真实 DashScope；同时验证降级路径也可以接受
     async def _safe_embed(texts):
@@ -71,7 +67,6 @@ async def test_ingest_then_search(kb_env):
     # 检索（无 API key→走 BM25；用 fallback embed 注入验证 RRF 路径）
     async with TestSession() as s:
         # 手动注入 embed（链路可跑）
-        from app.knowledge import search as search_mod
 
         results = await hybrid_search(s, "CPU 高怎么处理", lambda q: None, doc_ids=[1], top_k=3)
         # 无嵌入 → BM25 至少能命中含"CPU"的 key_text（keygen fallback 首句/标题）

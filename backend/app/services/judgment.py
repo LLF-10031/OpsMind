@@ -10,10 +10,8 @@ report_type 与 level 正交：
 """
 from __future__ import annotations
 
-import json
 from typing import Any
 
-from app.configs.settings import get_settings
 from app.core.exceptions import JudgmentFailure
 from app.core.limiter import limiter
 from app.core.llm import get_default_llm
@@ -54,7 +52,6 @@ async def second_gate_llm(
     仅 success 且有效输出时调用；受全局限流器约束。
     失败时抛 JudgmentFailure（上层降级 level=unknown + 模板兜底）。
     """
-    s = get_settings()
     rule = rule_text or "判断结果正常性：无明确规则时按输出是否健康判 ok/warn/crit"
     prompt = f"""你是运维巡检判定器。基于脚本输出判断严重程度。
 

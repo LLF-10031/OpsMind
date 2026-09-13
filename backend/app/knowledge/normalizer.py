@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
 from typing import Any
 
 from app.core.logging import logger
@@ -46,14 +45,13 @@ def load_text(file_type: str, content: bytes, filename: str) -> str:
             return "\n\n".join(pages)
         except Exception as exc:  # pragma: no cover
             logger.error(f"pdf 抽取失败 {filename}: {exc}")
-            return f"\n> [pdf 文本层抽取失败，需人工处理]\n"
+            return "\n> [pdf 文本层抽取失败，需人工处理]\n"
     raise ValueError(f"不支持的 file_type: {file_type}")
 
 
 def patch_images(md: str, image_markers: list[dict[str, Any]]) -> str:
     """2. 图片位置补丁：把图片占位替换为 `[图片#n]` + 说明（可选多模态）。"""
     for idx, marker in enumerate(sorted(image_markers, key=lambda m: m.get("pos", 0)), 1):
-        pos = marker.get("pos")
         alt = marker.get("alt", "")
         desc = marker.get("ai_description")
         note = f"[图片#{idx} 解析] " + (desc or "（图片，需人工查看）")

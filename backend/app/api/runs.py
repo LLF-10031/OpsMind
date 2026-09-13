@@ -82,11 +82,7 @@ async def get_run(run_id: int, session: AsyncSession = Depends(get_session)):
 @router.get("/{run_id}/report")
 async def get_report(run_id: int, session: AsyncSession = Depends(get_session)):
     rep = (
-        result := (
-            await session.execute(
-                __import__("sqlalchemy").select(Report).where(Report.run_id == run_id)
-            )
-        )
+        await session.execute(select(Report).where(Report.run_id == run_id))
     ).scalars().first()
     if not rep:
         raise HTTPException(status_code=404, detail="报告不存在")
@@ -129,7 +125,7 @@ async def read_output(
     if end is not None:
         lines = lines[: end - (start or 1) + 1]
     if keyword:
-        lines = [l for l in lines if keyword in l]
+        lines = [ln for ln in lines if keyword in ln]
     body = "".join(lines[:limit])
     return ok({"run_id": run_id, "lines": len(body.splitlines()), "content": body})
 

@@ -9,10 +9,8 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.configs.settings import settings
 from app.core.db import SessionLocal

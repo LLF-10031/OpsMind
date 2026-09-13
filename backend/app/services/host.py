@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import session_scope
 from app.core.exceptions import OpsMindError
 from app.executor.mcp_client import call_host
 from app.models import Host

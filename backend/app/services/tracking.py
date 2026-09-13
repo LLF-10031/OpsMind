@@ -1,7 +1,6 @@
 """跟踪指标服务（03 2.4）：CRUD + 趋势（D49 tracking 落地）。"""
 from __future__ import annotations
 
-import re
 from typing import Any
 
 from sqlalchemy import select
@@ -73,7 +72,6 @@ async def get_trend(session: AsyncSession, script_id: int, metric_key: str | Non
     history: list[dict[str, Any]] = []
     series: dict[str, list[dict[str, Any]]] = {}
     for r in runs:
-        ts = str(r.task_run_id) if r.task_run_id else ""
         started = None
         if r.task_run_id:
             tr = await session.get(TaskRun, r.task_run_id)

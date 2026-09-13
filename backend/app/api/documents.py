@@ -6,8 +6,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
-from app.knowledge import normalizer, splitter
-from app.knowledge.indexer import create_document_record, write_units
 from app.models import Document, Unit
 from app.models.schemas import fail, ok
 

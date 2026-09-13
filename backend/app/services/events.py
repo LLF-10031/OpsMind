@@ -48,7 +48,7 @@ async def stream_events(tr_id: int):
             try:
                 event, payload = await asyncio.wait_for(q.get(), timeout=30)
             except asyncio.TimeoutError:
-                yield f"event: heartbeat\ndata: ping\n\n"
+                yield "event: heartbeat\ndata: ping\n\n"
                 continue
             yield f"event: {event}\n{payload}"
             if event == "done":
