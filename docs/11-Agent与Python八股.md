@@ -127,8 +127,9 @@
 | 全局限流器 | asyncio/GIL、并发控制、熔断降级、令牌桶 |
 | RRF 检索 | RAG、Embedding、向量检索、BM25/分词 |
 | 三层记忆 | Agent 记忆、上下文工程、遗忘/衰减 |
-| 多 Agent + 黑板 | ReAct、多 Agent 协作、状态机 |
+| **对话助手** | SSE/异步生成器、上下文工程、RAG、LLM 降级 |
+| **校验管线（O4）** | Guardrails、防幻觉、确定性校验 |
+| 多 Agent + 黑板〔设计预留〕 | ReAct、多 Agent 协作、状态机 |
 | MCP 执行 | MCP 协议、最小权限、工具调用安全 |
 | SSE 流式 | async generator、HTTP 流式、前端状态机 |
-| O4 校验管线 | Guardrails、可溯源、防幻觉 |
 | Vibe coding | AI 协作开发、契约先行、代码评审 |

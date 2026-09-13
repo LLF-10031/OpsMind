@@ -6,10 +6,7 @@ LLM 依赖统一 monkeypatch，保证纯内存、无外部调用。
 """
 from __future__ import annotations
 
-import pytest
-
-from app.models import EvalCase, EvalResult, Message, Run, Script, Template, Session
-from app.models.schemas import fail, ok
+from app.models import EvalCase, EvalResult, Message, Run, Script
 
 
 def _fail(data) -> bool:
@@ -139,7 +136,9 @@ async def test_settings_get_put_roundtrip(db_session):
 
     before = await api_settings.get_settings(db_session)
     assert "llm_api_key" in before["data"]
-    assert "******" in before["data"]["llm_api_key"]
+    # GET 永不返回明文：未配置时为空串，已配置时为掩码（不依赖本地 .env 是否配 key）
+    _key = before["data"]["llm_api_key"]
+    assert _key == "" or _key.startswith("******")
 
     masked = await api_settings.update_settings({"llm_temperature": "0.3"}, db_session)
     assert masked["data"]["llm_temperature"] == "0.3"
@@ -149,6 +148,8 @@ async def test_settings_get_put_roundtrip(db_session):
 
     secret = await api_settings.update_settings({"llm_api_key": "sk-test-secret-1234"}, db_session)
     assert secret["data"]["llm_api_key"] == "******1234"
+    after_key = await api_settings.get_settings(db_session)
+    assert after_key["data"]["llm_api_key"] == "******1234"
 
 
 async def test_template_crud_and_apply(db_session):
@@ -160,7 +161,7 @@ async def test_template_crud_and_apply(db_session):
         list_templates,
         update_template,
     )
-    from app.models import Host, Task, TaskScript
+    from app.models import Host, Task
 
     host = Host(name="h1", mcp_endpoint="http://h")
     db_session.add(host)
