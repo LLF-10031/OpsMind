@@ -92,6 +92,7 @@ backend/
 │   ├── api/        # 路由（auth/hosts/scripts/tasks/runs/documents/memory/chat/eval）
 │   ├── configs/    # 配置中心
 │   ├── core/       # DB/LLM/限流器/日志/异常
+│   ├── diagnosis/  # 多 Agent 联动诊断（黑板契约 Planner→并行 Executor→Reviewer）
 │   ├── executor/   # 目标机 FastMCP 执行服务
 │   ├── graph/      # LangGraph 对话编排
 │   ├── knowledge/  # 知识库（规范化/检索/索引/keygen）
@@ -99,7 +100,7 @@ backend/
 │   ├── models/     # ORM 模型（20 表）
 │   ├── services/   # 业务逻辑（判定/报告/调度/校验/审计/评估/上下文压缩）
 │   └── tools/      # 工具注册
-├── tests/          # pytest 单测（19 用例，全绿）
+├── tests/          # pytest 单测（38 用例，全绿）
 └── docs/           # 设计文档（决策日志/需求/概要/数据库/详细设计/API/面试/术语）
 
 Dockerfile.executor   # 目标机执行服务镜像（python:3.13-slim + bash/python3/netcat）
@@ -112,6 +113,7 @@ Dockerfile.executor   # 目标机执行服务镜像（python:3.13-slim + bash/py
 - **知识库**：真实 LLM keygen + embedding → RRF（向量+BM25 中文分词）→ 勾选才查
 - **助手对话**：检索 + 真实 LLM 回答生成（qwen-turbo）+ 审计
 - **评估体系**：故障案例集 → 复用判定链路 → 命中率/误报率/质量评分
+- **联动诊断（多 Agent）**：crit/error 批次自动触发 LangGraph `StateGraph`（Planner 拆假设 → 日志/指标/变更三 Executor 并行只读采集 → Reviewer 汇总）；黑板契约"无证据不出结论"，幂等落库 + SSE（`GET /task-runs/{id}/diagnosis`）
 - **三层记忆**：Episodic/Semantic PG 化 + 内存兜底降级
 - **安全**：admin JWT、输出敏感打码、全局限流器、工具降级透明
 - **执行服务**：FastMCP streamable-http（/mcp + initialize 握手），解释器白名单 + 危险命令检测 + 输出截断，可裸启动或容器化
@@ -119,3 +121,11 @@ Dockerfile.executor   # 目标机执行服务镜像（python:3.13-slim + bash/py
 ## 技术栈
 
 Python 3.13 · FastAPI · LangChain · LangGraph · pgvector · APScheduler · FastMCP · SQLAlchemy · pytest
+
+## 赞赏支持
+
+如果这个项目对你有帮助，欢迎请作者喝杯咖啡 ☕（微信扫码），感谢投喂！
+
+<p align="center">
+  <img src="docs/收款码/thanks.jpg" alt="微信赞赏码" width="240">
+</p>

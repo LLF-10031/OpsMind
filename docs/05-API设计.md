@@ -2,7 +2,7 @@
 
 > 版本：v0.2（与决策日志 D1–D50 对齐，待定项已清理）
 > 接口按业务模块分组，后端执行时确定 report_type，前端仅按 report_type 映射渲染模板（D36/D47）。
-> 实现状态：**全量已落地**（含 tracking-metrics toggle/preview、scripts run/preview-llm/trend/trend-summary、templates apply、settings GET/PUT 持久化+密钥掩码、chat 会话 CRUD+消息游标分页+每轮落库+save-memory、eval results 列表/详情、documents preview、memory PUT、hosts 任务），见 `tests/test_api_gaps.py`；全量 30 例 + 缺口 11 例测试全绿。
+> 实现状态：**全量已落地**（含 tracking-metrics toggle/preview、scripts run/preview-llm/trend/trend-summary、templates apply、settings GET/PUT 持久化+密钥掩码、chat 会话 CRUD+消息游标分页+每轮落库+save-memory、eval results 列表/详情、documents preview、memory PUT、hosts 任务、**task-runs diagnosis 联动诊断结果（D51）**），见 `tests/test_api_gaps.py` 与 `tests/test_diagnosis.py`；后端全量 38 collected（36 passed, 2 skipped）全绿。
 
 ---
 
@@ -133,6 +133,10 @@ event: error           → {message}
 
 ### `GET /task-runs/{id}/runs` — 本次执行各脚本运行列表
 Query: `?level=warn&report_type=error&page=1`
+
+### `GET /task-runs/{id}/diagnosis` — 联动诊断结果（D51）
+响应: `{task_run_id, diagnosed}`；命中时附 `{status, hypothesis[], evidence{logs[],metrics[],changes[]}, conclusions[], flags[], degradation_notes[], contract_ok, elapsed_ms}`。
+未触发/失败未落库 → `diagnosed=false`（批次出现 crit/error/timeout/host_unreachable 时自动触发一次，结果幂等落 `task_run.diagnosis_json`）。
 
 ### `GET /runs/{run_id}` — 单脚本运行详情
 ### `GET /runs/{run_id}/report` — 单脚本报告（按 report_type 渲染）

@@ -13,8 +13,21 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.core.db import Base
+from app.diagnosis import graph as diag_graph
 from app.models import Host, Report, Run, Script, Task, TaskRun, TaskScript
 from app.services import execution
+
+
+async def _fake_diag_collect(executor, endpoint, auth_key, timeout):
+    return {"executor": executor, "exit_code": 0, "stdout": "probe ok", "duration_ms": 5}
+
+
+async def _fake_diag_plan(state):
+    return [{"text": "假设", "kind": "log"}]
+
+
+async def _fake_diag_review(state):
+    return [{"text": "疑似连接失败", "confidence": 0.6, "evidence_refs": ["logs"]}]
 
 
 async def fake_exec_runner(endpoint, tool, args, auth_key, timeout):
@@ -50,6 +63,10 @@ async def exec_env(tmp_path, monkeypatch) -> dict:
     monkeypatch.setattr(execution, "SESSION_FACTORY", _factory)
     monkeypatch.setattr(execution, "EXEC_RUNNER", fake_exec_runner)
     monkeypatch.setattr(execution, "second_gate_llm", fake_second_gate)
+    # 诊断也用离线桩，避免真实 LLM/目标机
+    monkeypatch.setattr(diag_graph, "PLANNER_FN", _fake_diag_plan)
+    monkeypatch.setattr(diag_graph, "REVIEWER_FN", _fake_diag_review)
+    monkeypatch.setattr(diag_graph, "COLLECT_FN", _fake_diag_collect)
     monkeypatch.setattr(
         execution,
         "_write_output",
@@ -122,3 +139,6 @@ async def test_execute_task_run_flow(exec_env):
 
         tr = await s.get(TaskRun, tr_id)
         assert tr.status == "DONE"
+        # 批次含 error → 触发联动诊断并落库
+        assert tr.diagnosis_json is not None
+        assert tr.diagnosis_json["conclusions"]

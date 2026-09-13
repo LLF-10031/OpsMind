@@ -47,6 +47,17 @@ async def task_run_detail(task_run_id: int, session: AsyncSession = Depends(get_
     )
 
 
+@router.get("/{task_run_id}/diagnosis")
+async def task_run_diagnosis(task_run_id: int, session: AsyncSession = Depends(get_session)):
+    """联动诊断结果（D38）。未触发/失败未落库 → diagnosed=false。"""
+    tr = await session.get(TaskRun, task_run_id)
+    if not tr:
+        raise HTTPException(status_code=404, detail="不存在")
+    if not tr.diagnosis_json:
+        return ok({"task_run_id": task_run_id, "diagnosed": False})
+    return ok({"task_run_id": task_run_id, "diagnosed": True, **tr.diagnosis_json})
+
+
 @router.get("/{task_run_id}/runs")
 async def runs_of(task_run_id: int, session: AsyncSession = Depends(get_session)):
     from app.models import Script

@@ -129,7 +129,7 @@
 | 三层记忆 | Agent 记忆、上下文工程、遗忘/衰减 |
 | **对话助手** | SSE/异步生成器、上下文工程、RAG、LLM 降级 |
 | **校验管线（O4）** | Guardrails、防幻觉、确定性校验 |
-| 多 Agent + 黑板〔设计预留〕 | ReAct、多 Agent 协作、状态机 |
+| 多 Agent + 黑板 | ReAct、多 Agent 协作、状态机（LangGraph StateGraph） |
 | MCP 执行 | MCP 协议、最小权限、工具调用安全 |
 | SSE 流式 | async generator、HTTP 流式、前端状态机 |
 | Vibe coding | AI 协作开发、契约先行、代码评审 |

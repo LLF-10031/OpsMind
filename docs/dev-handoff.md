@@ -1,7 +1,7 @@
 # OpsMind · 开发交接清单（dev-handoff）
 
 > 给开发子会话（如 `opsmind-dev`）的开工指引。
-> **决策日志 = 唯一真源**：开发中若发现"本文档/04 详细设计 与 决策日志 D1–D50 冲突"，一律以决策日志为准并回写文档。
+> **决策日志 = 唯一真源**：开发中若发现"本文档/04 详细设计 与 决策日志 D1–D51 冲突"，一律以决策日志为准并回写文档。
 
 ---
 
@@ -17,6 +17,7 @@
 | Phase 4 记忆/评估/安全 | ✅ 完成(安全更细待做) | 评估案例CRUD+运行评估(**真实判定链路**：第一关短路+第二关复用second_gate_llm受限流+降级unknown)+聚合指标(命中率/误报率/质量)；eval表就绪API挂载；19测试全绿；"待做"雷达图前端(二期)+安全更细 |
 | Phase 5 测试+启动 | ✅ 完成 | **executor Docker 起服并 MCP 冒烟全通**（Dockerfile.executor 镜像可构建、容器 opsmind-executor 运行、8003 映射；修复 3 处：容器内绑127.0.0.1外部不通→OPSMIND_BIND_HOST/0.0.0.0、client 拼错 /message→/mcp+initialize握手+SSE解析、解释器 argv 带多余元素→候选路径首个存在者）；hosts 建主机即探活真实 MCP ping 通过 + 真实 PG e2e 通过；19测试全绿；README按需 |
 | API 缺口闭环（05-API 全量落地） | ✅ 完成 | **templates/settings/tracking-metrics/scripts(单脚本 run/preview-llm/trend/trend-summary)/chat 会话(CRUD+消息游标分页+每轮落 Message+save-memory)/eval results 列表+详情聚合/内部 memory PUT/hosts 任务/documents 预览 全量落地**。要点：`POST /scripts/{id}/run?host_id=` 走 `trigger=test` 独立 Run（task_id 空、不触发 AI 分析）供 tracking 预览复用；eval 详情按 run_id 实时聚合命中/误报/质量+雷达；settings 持久化 SettingsKV + llm_api_key 掩码。**修复两处**：`app/api/settings.py` 与配置对象 `settings` 撞名→main.py 导入别名 `settings_api`；scripts.py 两处误调 `serialize`→`_to_dict`（真实 bug）。新增缺口测试 `tests/test_api_gaps.py` 11 例；**全量 30 例全绿** |
+| 多 Agent 联动诊断（D51） | ✅ 完成（最小版） | 新增 `app/diagnosis/{blackboard,executors,graph,service}.py`：LangGraph `StateGraph`（Planner→并行 log/metric/change Executor→Reviewer）；黑板契约 `DiagnosticState` 各写各格 + `validate_contract` 保证"无证据不出结论"；Executor 用只读探针经 `run_script` 采集、失败不写证据格只记降级；批次 crit/error 自动触发、内联等待保证 `diag_*` 先于 `done`；幂等落 `TaskRun.diagnosis_json`；新增 `GET /task-runs/{id}/diagnosis`。新增 `tests/test_diagnosis.py` 8 例；**全量 38 collected（36 passed, 2 skipped）全绿，ruff 全绿** |
 
 > 启动方式：`cd backend && .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload`
 
@@ -24,7 +25,7 @@
 
 ## 一、先读什么（按顺序）
 
-1. `D:\IdeaDocs\myproject\设计讨论决策日志.md` —— 全文 D1–D50（唯一真源，含所有取舍与原因）
+1. `D:\IdeaDocs\myproject\设计讨论决策日志.md` —— 全文 D1–D51（唯一真源，含所有取舍与原因）
 2. `D:\IdeaDocs\myproject\OpsMind\docs\02-概要设计.md` —— 架构/模块/部署/数据流/一致性对照表（附录A/B）
 3. `D:\IdeaDocs\myproject\OpsMind\docs\03-数据库设计.md` —— 表结构（含 pgvector/session/memory）
 4. `D:\IdeaDocs\myproject\OpsMind\docs\04-详细设计.md` —— §0–§7 实现蓝图（判定/报告/执行/校验/调度/知识库/助手/记忆/评估/安全）
@@ -76,6 +77,7 @@ Phase 5  测试 + 补齐 05-API 主要接口 + 启动文档
 - **search_kb 默认只在"勾选文档集"内检索**；全量=显式开关。
 - **记忆（D44）**：Episodic=片段闭合(压缩/闲置10min/手动保存按钮)触发；Semantic=累计≥30 提炼+跨会话证据校验。
 - **安全（D39/D48）**：输出敏感打码是所有生成文本出口的横切点；admin JWT 登录；审计是三图工具调用横切点。
+- **联动诊断（D51）**：crit/error 批次自动触发一次；黑板契约各写各格（`flags/degradation_notes` 用 reducer）；**无证据不出结论**；结果幂等落 `TaskRun.diagnosis_json`（失败不落库可重试）；`diag_started/diagnostic_done/diag_failed` 先于 `done` 发。
 
 ## 五、验收清单（每阶段结束自查）
 

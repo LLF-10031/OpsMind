@@ -119,6 +119,7 @@ class TaskRun(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     summary_json: Mapped[dict | None] = mapped_column(JSON)
     context_snapshot: Mapped[dict | None] = mapped_column(JSON)  # 背景包快照（D47）
+    diagnosis_json: Mapped[dict | None] = mapped_column(JSON)  # 联动诊断结果（D38）；None=未诊断/失败可重试
     error_message: Mapped[str | None] = mapped_column(Text)
     __table_args__ = (Index("ix_task_run_task_start", "task_id", "started_at"),)
 

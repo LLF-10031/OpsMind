@@ -230,8 +230,10 @@ async def execute_task_run(tr_id: int) -> dict:
             await session.execute(select(Run).where(Run.task_run_id == tr_id))
         ).scalars().all()
         summary = {}
+        pairs: list[tuple[str, str]] = []
         for r in runs:
             summary[r.report_type] = summary.get(r.report_type, 0) + 1
+            pairs.append((r.report_type, r.level))
         tr.summary_json = summary
         tr.status = "CANCELLED" if cancelled else "DONE"
         tr.finished_at = datetime.now(timezone.utc)
@@ -239,6 +241,20 @@ async def execute_task_run(tr_id: int) -> dict:
         clear_cancel(tr_id)
         try:
             await event_svc.publish(tr_id, "batch_ready", {"summary": summary})
+        except Exception:  # noqa: BLE001
+            pass
+
+        # D38/D47：批次出现 crit/error/timeout/host_unreachable → 联动诊断一次。
+        # 内联等待，保证 diag_* 事件先于 done，同一 SSE 通道可见。
+        from app.diagnosis.service import diagnose_task_run, is_anomalous
+
+        if not cancelled and is_anomalous(pairs):
+            try:
+                await diagnose_task_run(tr_id, host.id)
+            except Exception as exc:  # noqa: BLE001 诊断失败不阻塞主链路
+                logger.warning(f"联动诊断异常（task_run={tr_id}）: {exc}")
+
+        try:
             await event_svc.publish(tr_id, "done", {"task_run_id": tr_id, "cancelled": cancelled})
         except Exception:  # noqa: BLE001
             pass
