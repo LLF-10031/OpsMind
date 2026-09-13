@@ -1,0 +1,13 @@
+FROM docker.m.daocloud.io/python:3.13-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends bash python3 procps netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml .
+RUN pip install --no-cache-dir fastmcp httpx
+
+COPY app/executor/server.py app/executor/__init__.py ./app/executor/
+
+EXPOSE 8003
+CMD ["python", "-m", "app.executor.server"]

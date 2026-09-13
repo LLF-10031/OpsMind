@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opsmind"
+version = "0.1.0"
+description = "面向单兵运维的定时巡检 + AI 智能分析平台（FastAPI + LangGraph + pgvector + MCP）"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "sse-starlette>=2.1",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.2",
+    "python-dotenv>=1.0",
+    "langchain>=0.1.0",
+    "langchain-core>=0.1.0",
+    "langchain-openai>=1.0.0",
+    "langgraph>=0.2.0",
+    "langchain-postgres>=0.0.9",
+    "langchain-text-splitters>=1.0.0",
+    "langchain-mcp-adapters>=0.2.1",
+    "fastmcp>=2.14.0",
+    "openai>=1.30.0",
+    "asyncpg>=0.29",
+    "psycopg>=3.1",
+    "sqlalchemy>=2.0",
+    "pgvector>=0.2.5",
+    "apscheduler>=3.10",
+    "redis>=5.0",
+    "httpx>=0.26",
+    "aiofiles>=23.2",
+    "python-multipart>=0.0.9",
+    "loguru>=0.7.2",
+    "pypdf>=4.2",
+    "pdfplumber>=0.11",
+    "jieba>=0.42",
+    "pyjwt>=2.8",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=3.2,<4.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=4.1",
+    "ruff>=0.5",
+    "httpx>=0.26",
+]
+
+[project.scripts]
+opsmind = "app.main:run"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --cov=app --cov-report=term-missing"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

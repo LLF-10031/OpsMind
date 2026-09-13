@@ -1,0 +1,62 @@
+# OpsMind 完整一键部署：PG + 后端 + 前端 + 执行器
+# 使用国内镜像源（docker.aityp.com/s/docker.io 前缀）拉取更快。
+# 先 cp backend/.env.example backend/.env 并填写配置
+# 启动：docker compose up -d --build
+services:
+  pg:
+    image: docker.m.daocloud.io/pgvector/pgvector:pg16
+    container_name: opsmind-pg
+    environment:
+      POSTGRES_USER: opsmind
+      POSTGRES_PASSWORD: opsmind
+      POSTGRES_DB: opsmind
+    ports:
+      - "5432:5432"
+    volumes:
+      - opsmind_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opsmind -d opsmind"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: opsmind-backend
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg://opsmind:opsmind@pg:5432/opsmind
+    ports:
+      - "8000:8000"
+    depends_on:
+      pg:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: opsmind-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  executor:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.executor
+    container_name: opsmind-executor
+    environment:
+      OPSMIND_BIND_HOST: "0.0.0.0"
+      OPSMIND_PORT: "8003"
+    ports:
+      - "8003:8003"
+    restart: unless-stopped
+
+volumes:
+  opsmind_pg_data:
